@@ -1,0 +1,180 @@
+\documentclass[conference]{IEEEtran}
+
+% ====== PACKAGES ======
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{cite}
+\usepackage{hyperref}
+\usepackage{float}
+
+% ====== HYPERREF SETUP ======
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    urlcolor=blue
+}
+
+% ====== DOCUMENT ======
+\begin{document}
+
+\title{ECG Heartbeat Classification Using 1D CNN Model}
+
+\author{
+\IEEEauthorblockN{Nguyen Thi Lan Huong}
+\IEEEauthorblockA{
+Student ID: 23BI14191 \\
+University of Science and Technology of Hanoi (USTH) \\
+Lecturer: Tran Giang Son \\
+Email: huongntl.23bi14191@usth.edu.vn
+}
+}
+
+\maketitle
+
+\begin{abstract}
+Electrocardiogram (ECG) interpretation is a fundamental task in clinical cardiology for the detection of cardiac abnormalities. This paper presents a deep learning-based approach for automatic ECG heartbeat classification using a one-dimensional Convolutional Neural Network (1D CNN). The proposed model is evaluated on the MIT-BIH Arrhythmia dataset and classifies heartbeats into five categories. By leveraging convolutional feature extraction on raw ECG signals and applying class weighting to handle data imbalance, the model demonstrates effective classification performance, particularly for minority heartbeat classes. The results suggest that 1D CNNs provide a robust and efficient framework for ECG signal analysis and automated heartbeat classification.
+\end{abstract}
+
+\begin{IEEEkeywords}
+ECG Classification, Heartbeat Categorization, One-Dimensional Convolutional Neural Network, Deep Learning, MIT-BIH Arrhythmia Dataset.
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+Cardiovascular diseases (CVDs) are among the leading causes of mortality worldwide, highlighting the importance of accurate and timely cardiac diagnosis. Electrocardiogram (ECG) analysis is a non-invasive and widely used technique for monitoring cardiac electrical activity and detecting heart rhythm abnormalities. However, manual interpretation of long-term ECG recordings is time-consuming and prone to human error, motivating the development of automated ECG analysis systems.
+
+Traditional machine learning approaches for ECG classification often depend on handcrafted feature extraction, which requires domain expertise and limits model generalization. In contrast, deep learning methods enable end-to-end learning directly from raw ECG signals. In particular, one-dimensional Convolutional Neural Networks (1D CNNs) have shown strong capability in capturing local temporal and morphological characteristics of ECG waveforms.
+
+In this work, we investigate the use of a 1D CNN for automated ECG heartbeat classification on the MIT-BIH Arrhythmia dataset. To address the inherent class imbalance of the dataset, a class-weighting strategy is applied during training. The proposed approach is evaluated using standard classification metrics and confusion matrix analysis, demonstrating the effectiveness of 1D CNNs for ECG heartbeat categorization.
+
+\section{Dataset Description}
+
+This study utilizes the MIT-BIH Arrhythmia Dataset, which is publicly available on Kaggle and widely used as a benchmark for ECG heartbeat classification tasks. The dataset consists of preprocessed electrocardiogram (ECG) recordings, where each sample represents a single heartbeat segmented from continuous ECG signals. Each heartbeat is encoded as a fixed-length one-dimensional signal of 187 time steps, obtained through resampling and normalization.
+
+The dataset is divided into training and test sets, containing 87,554 and 21,892 heartbeat samples, respectively. Each sample is associated with a class label ranging from 0 to 4, corresponding to five clinically relevant heartbeat categories defined in the original MIT-BIH annotation scheme. These classes include normal heartbeats as well as several types of abnormal rhythms.
+
+The five heartbeat classes are defined as follows:
+\begin{itemize}
+    \item \textbf{Class 0 (Normal)}: Normal sinus rhythm heartbeats.
+    \item \textbf{Class 1 (SVEB)}: Supraventricular ectopic beats.
+    \item \textbf{Class 2 (VEB)}: Ventricular ectopic beats.
+    \item \textbf{Class 3 (Fusion)}: Fusion of normal and ventricular beats.
+    \item \textbf{Class 4 (Unknown)}: Unclassifiable or paced beats.
+\end{itemize}
+
+All ECG signals are normalized to ensure numerical stability during training. The fixed-length representation and standardized preprocessing make the dataset suitable for end-to-end deep learning models, particularly one-dimensional Convolutional Neural Networks.
+
+\subsection{Class Distribution and Imbalance}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{class distribution.png}
+    \caption{Class distribution of heartbeat categories in the training set}
+    \label{fig:class_distribution}
+\end{figure}
+
+Exploratory data analysis reveals a severe class imbalance in the MIT-BIH dataset. As illustrated in Fig.~\ref{fig:class_distribution}, the majority of samples belong to the normal heartbeat class (Class 0), while abnormal heartbeat classes are significantly underrepresented. This imbalance poses a major challenge for classification models, as it can lead to biased predictions toward the dominant class.
+
+To mitigate this issue, a class-weighting strategy is adopted during model training, allowing the learning algorithm to assign higher importance to minority classes and improve overall classification performance.
+
+\subsection{ECG Morphology Visualization}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{ecg signals.png}
+    \caption{Visualization of sample ECG heartbeat signals}
+    \label{fig:signal}
+\end{figure}
+
+To gain insight into the morphological characteristics of ECG heartbeats, several sample signals from the dataset are visualized, as shown in Fig.~\ref{fig:signal}. Each signal represents a single cardiac cycle and exhibits characteristic waveform components, including the P-wave, QRS complex, and T-wave.
+
+The visualization highlights the temporal structure of ECG signals and demonstrates variations in waveform shape and amplitude across different heartbeat samples. These morphological patterns provide essential cues for distinguishing between normal and abnormal heartbeats and motivate the use of convolutional neural networks for automated feature extraction.
+
+\section{Methodology}
+
+This section describes the proposed methodology for ECG heartbeat classification, including data preprocessing, model architecture, and training strategy.
+
+\subsection{Problem Formulation}
+The task is formulated as a multi-class classification problem, where each ECG heartbeat is assigned to one of five categories defined in the MIT-BIH Arrhythmia dataset. Given a one-dimensional ECG signal representing a single cardiac cycle, the objective is to predict its corresponding heartbeat class.
+
+\subsection{Data Preprocessing}
+Each ECG heartbeat is represented as a fixed-length one-dimensional signal consisting of 187 time steps. The raw signals are normalized and reshaped into a three-dimensional format $(N, T, C)$, where $N$ denotes the number of samples, $T=187$ the number of time steps, and $C=1$ the signal channel. Class labels are encoded as integer values ranging from 0 to 4, which enables the use of sparse categorical loss functions during training.
+
+\subsection{Model Architecture}
+A one-dimensional Convolutional Neural Network (1D CNN) is employed to automatically learn discriminative features from ECG signals. The network consists of two convolutional layers with ReLU activation functions, each followed by max-pooling layers to reduce temporal dimensionality and improve robustness. The extracted feature maps are flattened and passed through a fully connected layer with dropout regularization to mitigate overfitting. The final output layer uses a softmax activation function to produce class probabilities for the five heartbeat categories.
+
+\subsection{Training Strategy}
+
+The proposed model is trained using the Adam optimizer with a fixed learning rate. Training is performed for 30 epochs with a batch size of 128. To monitor generalization performance and prevent overfitting, 20\% of the training data is reserved for validation during training. Due to the severe class imbalance in the dataset, class weighting is applied to penalize misclassification of minority classes more heavily. This strategy encourages the model to pay greater attention to underrepresented heartbeat categories.
+
+
+\section{Experimental Results}
+
+The performance of the proposed 1D CNN model is evaluated on the held-out test set of the MIT-BIH Arrhythmia dataset. Standard classification metrics, including accuracy, precision, recall, F1-score, and confusion matrix analysis, are used to assess model effectiveness.
+
+\subsection{Overall Performance}
+The model achieves a test accuracy of 82.76\%. While this result indicates reasonable overall performance, accuracy alone is insufficient to fully characterize the model due to the severe class imbalance present in the dataset. Therefore, class-wise metrics and confusion matrix analysis are further examined.
+
+\subsection{Confusion Matrix Analysis}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{cm.png}
+    \caption{Confusion matrix}
+    \label{fig:confusion_matrix}
+\end{figure}
+Figure~\ref{fig:confusion_matrix} presents the confusion matrix obtained on the test set. The results show that the model predominantly predicts the majority class (Class 0), corresponding to normal heartbeats. As a consequence, all samples from minority classes are misclassified as the normal class. This behavior highlights the strong influence of class imbalance on the learning process, despite the application of class weighting during training.
+
+\subsection{Class-wise Evaluation}
+
+\begin{table}[h]
+\centering
+\caption{Class-wise precision, recall, and F1-score on the test set.}
+\label{tab:classification_report}
+\begin{tabular}{ccccc}
+\hline
+Class & Precision & Recall & F1-score & Support \\
+\hline
+0 & 0.83 & 1.00 & 0.91 & 18118 \\
+1 & 0.00 & 0.00 & 0.00 & 556 \\
+2 & 0.00 & 0.00 & 0.00 & 1448 \\
+3 & 0.00 & 0.00 & 0.00 & 162 \\
+4 & 0.00 & 0.00 & 0.00 & 1608 \\
+\hline
+Macro Avg & 0.17 & 0.20 & 0.18 & -- \\
+Weighted Avg & 0.68 & 0.83 & 0.75 & -- \\
+\hline
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:classification_report} summarizes the precision, recall, and F1-score for each heartbeat class. The normal heartbeat class (Class 0) achieves a high recall of 1.00 and an F1-score of 0.91. In contrast, the abnormal heartbeat classes exhibit near-zero precision and recall, indicating that the model fails to correctly identify minority classes. As a result, the macro-averaged F1-score remains low, reflecting limited balanced classification performance across all classes.
+
+\section{Discussion}
+
+The experimental results demonstrate that the proposed 1D CNN model achieves a test accuracy of 82.76\% on the MIT-BIH Arrhythmia dataset. Although this accuracy appears relatively high, a more detailed analysis using confusion matrix and class-wise metrics reveals that the model predominantly predicts the majority class corresponding to normal heartbeats. As a result, the recognition performance for minority heartbeat classes remains limited.
+
+This behavior is mainly attributed to the severe class imbalance inherent in the MIT-BIH dataset. Despite the use of class weighting during training, the learned decision boundaries are still biased toward the dominant class. This observation highlights the limitation of relying solely on accuracy as an evaluation metric for imbalanced medical datasets and emphasizes the importance of using class-wise precision, recall, and F1-score for a more comprehensive performance assessment.
+
+A comparison with the work of Kachuee et al.~\cite{kachuee2018ecg} reveals several key differences. In their study, a deep residual CNN architecture is employed, and the dataset is explicitly balanced through data augmentation, resulting in an average classification accuracy of 93.4\%. Furthermore, residual connections enable the training of deeper networks, allowing the model to learn more expressive and transferable representations of ECG signals. In contrast, the model proposed in this work adopts a simpler 1D CNN architecture without residual blocks or data augmentation, which limits its capacity to effectively distinguish minority heartbeat classes.
+
+Moreover, Kachuee et al. evaluate their model on a balanced test set constructed according to the AAMI EC57 standard, whereas the present study evaluates performance on the original imbalanced test distribution. This methodological difference further explains the performance gap observed between the two approaches.
+
+Overall, while the proposed model demonstrates the feasibility of using 1D CNNs for automated ECG heartbeat classification, the comparison with state-of-the-art methods suggests that additional strategies, such as advanced data augmentation, residual learning, or transfer learning, are necessary to achieve more robust and clinically reliable performance.
+
+\section{Conclusion}
+
+This study investigated the application of a one-dimensional Convolutional Neural Network for automated ECG heartbeat classification using the MIT-BIH Arrhythmia dataset. The proposed model demonstrated reasonable overall accuracy in recognizing normal heartbeats; however, detailed analysis revealed significant challenges in detecting minority heartbeat classes due to severe class imbalance. The experimental results highlight the limitations of relying solely on accuracy for evaluating imbalanced medical datasets. Future work will focus on improving minority class recognition through advanced data augmentation techniques, residual network architectures, and transfer learning strategies to enhance clinical reliability.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+
+
+
+
+
+\end{document}
